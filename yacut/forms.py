@@ -1,41 +1,51 @@
+import re
+
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, URLField
-from wtforms.validators import DataRequired, Length, Optional, ValidationError
+from wtforms.validators import (
+    DataRequired,
+    Length,
+    Optional,
+    Regexp,
+    ValidationError
+)
 
 from .constants import (
     LETTERS_AND_DIGITS,
-    LEN_SHORT_ID_ERROR,
-    LINK_ALREADY_USE_ERROR,
+    LEN_SHORT_ERROR,
     INVALID_SYMBOL_ERROR,
-    MIN_LEN,
-    MAX_LEN
+    LEN_TO_GENERATE_SHORT_LINK,
+    LINK_ALREADY_USE_ERROR,
+    PATTERN_LINK
 )
 from .models import URLMap
 
 
+ORIGINAL_LINK_DESCRIPTION = 'Длинная ссылка'
+ORIGINAL_LINK_VALIDATORS_MESSAGE = 'Обязательное поле'
+SHORT_LINK_DESCRIPTION = 'Ваш вариант короткой ссылки'
+CREATE_LINK_DESCRIPTION = 'Создать'
+
+
 class URLMapForm(FlaskForm):
     original_link = URLField(
-        'Длинная ссылка',
-        validators=[DataRequired(message='Обязательное поле'), ]
+        ORIGINAL_LINK_DESCRIPTION,
+        validators=[DataRequired(message=ORIGINAL_LINK_VALIDATORS_MESSAGE), ]
     )
     custom_id = StringField(
-        'Ваш вариант короткой ссылки',
+        SHORT_LINK_DESCRIPTION,
         validators=[
             Optional(),
             Length(
-                min=MIN_LEN,
-                max=MAX_LEN,
-                message=LEN_SHORT_ID_ERROR
+                max=LEN_TO_GENERATE_SHORT_LINK,
+                message=LEN_SHORT_ERROR
             ),
+            Regexp(PATTERN_LINK, message=INVALID_SYMBOL_ERROR)
         ]
     )
-    submit = SubmitField('Создать')
+    submit = SubmitField(CREATE_LINK_DESCRIPTION)
 
     def validate_custom_id(form, field):
-        data = field.data
-        for symbol in data:
-            if symbol not in LETTERS_AND_DIGITS:
-                raise ValidationError(message=INVALID_SYMBOL_ERROR)
-        if URLMap.query.filter_by(short=data).first() is not None:
+        if URLMap.get_urlmap(short=field.data) is not None:
             raise ValidationError(message=LINK_ALREADY_USE_ERROR)
-        return data
+        return field.data
