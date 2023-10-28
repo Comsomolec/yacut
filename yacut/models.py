@@ -13,13 +13,13 @@ from .constants import (
     LETTERS_AND_DIGITS,
     LEN_TO_GENERATE_SHORT_LINK,
     LEN_ORIGINAL_ERROR,
-    LEN_SHORT_ERROR,
     LINK_ALREADY_USE_ERROR,
     MAX_ORIGINAL_LINK_LENGHT,
     MAX_SHORT_LINK_LENGHT,
     PATTERN_LINK,
 )
 from settings import REDIRECT_FROM_SHORT_LINK
+
 
 class URLMap(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -43,7 +43,7 @@ class URLMap(db.Model):
 
     @staticmethod
     def get_unique_short_id(len_link=LEN_TO_GENERATE_SHORT_LINK):
-        for _ in ATTEMPT_COUNT:
+        for _ in range(ATTEMPT_COUNT):
             random_link = ''.join(
                 random.choices(LETTERS_AND_DIGITS, k=len_link)
             )
@@ -59,8 +59,8 @@ class URLMap(db.Model):
             short = URLMap.get_unique_short_id()
         else:
             if len(short) > MAX_SHORT_LINK_LENGHT:
-                raise ValidationError(LEN_SHORT_ERROR)
-            if bool(re.match(PATTERN_LINK, short)):
+                raise ValidationError(INVALID_SYMBOL_ERROR)
+            if not bool(re.match(PATTERN_LINK, short)):
                 raise ValidationError(INVALID_SYMBOL_ERROR)
             if URLMap.get_urlmap(short=short) is not None:
                 raise ValidationError(LINK_ALREADY_USE_ERROR)

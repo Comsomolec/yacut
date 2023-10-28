@@ -120,3 +120,7 @@ a.regular-link:hover {
 footer a.regular-link {
     font-weight: 200;
 }
+
+.error {
+    color: red
+}

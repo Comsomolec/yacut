@@ -1,4 +1,4 @@
-from flask import flash, render_template, redirect, request, url_for
+from flask import flash, render_template, redirect, url_for
 
 from . import app
 from .forms import URLMapForm
@@ -12,17 +12,18 @@ def index_view():
     if not form.validate_on_submit():
         return render_template('index.html', form=form)
     try:
-        URLMap.create_urlmap(
+        url_map = URLMap.create_urlmap(
             original=form.original_link.data, short=form.custom_id.data
         )
     except Exception as error:
         flash(error)
+        return render_template('index.html', form=form)
     return render_template(
         'index.html',
         form=form,
         url=url_for(
             REDIRECT_FROM_SHORT_LINK,
-            short_id=form.custom_id.data,
+            short_id=url_map.short,
             _external=True
         )
     )

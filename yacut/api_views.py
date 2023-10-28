@@ -28,10 +28,14 @@ def add_id():
     if "url" not in data:
         raise InvalidAPIUsage(URL_FIELD_IS_EMPTY_ERROR)
     try:
-        url_map = URLMap.create_urlmap(
-            original=data['url'],
-            short=data['custom_id']
+        return (
+            jsonify(
+                URLMap.create_urlmap(
+                    original=data['url'],
+                    short=data['custom_id'] if 'custom_id' in data else None
+                ).to_dict()
+            ),
+            HTTPStatus.CREATED
         )
     except Exception as error:
-        raise InvalidAPIUsage(error)
-    return jsonify(url_map.to_dict()), HTTPStatus.CREATED
+        raise InvalidAPIUsage(str(error))

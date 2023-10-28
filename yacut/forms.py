@@ -1,5 +1,3 @@
-import re
-
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, URLField
 from wtforms.validators import (
@@ -11,7 +9,6 @@ from wtforms.validators import (
 )
 
 from .constants import (
-    LETTERS_AND_DIGITS,
     LEN_SHORT_ERROR,
     INVALID_SYMBOL_ERROR,
     LEN_TO_GENERATE_SHORT_LINK,
