@@ -43,6 +43,6 @@ class URLMapForm(FlaskForm):
     submit = SubmitField(CREATE_LINK_DESCRIPTION)
 
     def validate_custom_id(form, field):
-        if URLMap.get_urlmap(short=field.data) is not None:
+        if URLMap.get(short=field.data) is not None:
             raise ValidationError(message=LINK_ALREADY_USE_ERROR)
         return field.data

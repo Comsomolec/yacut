@@ -9,6 +9,7 @@ from yacut import db
 
 from .constants import (
     ATTEMPT_COUNT,
+    GENERATION_URL_ERROR,
     INVALID_SYMBOL_ERROR,
     LETTERS_AND_DIGITS,
     LEN_TO_GENERATE_SHORT_LINK,
@@ -38,31 +39,34 @@ class URLMap(db.Model):
         )
 
     @staticmethod
-    def get_urlmap(short):
+    def get(short):
         return URLMap.query.filter_by(short=short).first()
 
     @staticmethod
-    def get_unique_short_id(len_link=LEN_TO_GENERATE_SHORT_LINK):
+    def get_unique_short_id():
         for _ in range(ATTEMPT_COUNT):
-            random_link = ''.join(
-                random.choices(LETTERS_AND_DIGITS, k=len_link)
+            short = ''.join(
+                random.choices(
+                    LETTERS_AND_DIGITS, k=LEN_TO_GENERATE_SHORT_LINK
+                )
             )
-            if URLMap.get_urlmap(short=random_link) is not None:
+            if URLMap.get(short=short) is not None:
                 continue
-            return random_link
+            return short
+        raise ValidationError(GENERATION_URL_ERROR)
 
     @staticmethod
-    def create_urlmap(original, short=None):
-        if len(original) > MAX_ORIGINAL_LINK_LENGHT:
-            raise ValidationError(LEN_ORIGINAL_ERROR)
-        if short is None or short == '':
+    def create(original, short=None, validation=False):
+        if not short:
             short = URLMap.get_unique_short_id()
-        else:
+        if validation:
+            if len(original) > MAX_ORIGINAL_LINK_LENGHT:
+                raise ValidationError(LEN_ORIGINAL_ERROR)
             if len(short) > MAX_SHORT_LINK_LENGHT:
                 raise ValidationError(INVALID_SYMBOL_ERROR)
-            if not bool(re.match(PATTERN_LINK, short)):
+            if not re.match(PATTERN_LINK, short):
                 raise ValidationError(INVALID_SYMBOL_ERROR)
-            if URLMap.get_urlmap(short=short) is not None:
+            if URLMap.get(short=short) is not None:
                 raise ValidationError(LINK_ALREADY_USE_ERROR)
         url_map = URLMap(
             original=original,
@@ -73,5 +77,5 @@ class URLMap(db.Model):
         return url_map
 
     @staticmethod
-    def get_urlmap_or_404(short):
+    def get_or_404(short):
         return URLMap.query.filter_by(short=short).first_or_404()
