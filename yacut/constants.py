@@ -22,5 +22,3 @@ LEN_SHORT_ERROR = (
 )
 LINK_NOT_FOUND = 'Указанный id не найден'
 URL_FIELD_IS_EMPTY_ERROR = '"url" является обязательным полем!'
-
-
