@@ -9,15 +9,15 @@ from yacut import db
 
 from .constants import (
     ATTEMPT_COUNT,
-    GENERATION_URL_ERROR,
+    GENERATION_SHORT_ERROR,
     INVALID_SYMBOL_ERROR,
     LETTERS_AND_DIGITS,
     LEN_TO_GENERATE_SHORT,
     LEN_ORIGINAL_ERROR,
-    LINK_ALREADY_USE_ERROR,
+    SHORT_ALREADY_USE_ERROR,
     MAX_ORIGINAL_LINK_LENGHT,
-    MAX_SHORT_LINK_LENGHT,
-    PATTERN_LINK,
+    MAX_SHORT_LENGHT,
+    PATTERN_SHORT,
 )
 from settings import REDIRECT_FROM_SHORT_LINK
 
@@ -25,17 +25,15 @@ from settings import REDIRECT_FROM_SHORT_LINK
 class URLMap(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.String(MAX_ORIGINAL_LINK_LENGHT), nullable=False)
-    short = db.Column(db.String(MAX_SHORT_LINK_LENGHT), unique=True)
+    short = db.Column(db.String(MAX_SHORT_LENGHT), unique=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def to_dict(self):
         return dict(
             url=self.original,
             short_link=url_for(
-                REDIRECT_FROM_SHORT_LINK,
-                short_id=self.short,
-                _external=True
-            )
+                REDIRECT_FROM_SHORT_LINK, short_id=self.short, _external=True
+            ),
         )
 
     @staticmethod
@@ -45,34 +43,32 @@ class URLMap(db.Model):
     @staticmethod
     def get_unique_short_id():
         for _ in range(ATTEMPT_COUNT):
-            short = ''.join(
-                random.choices(
-                    LETTERS_AND_DIGITS, k=LEN_TO_GENERATE_SHORT
-                )
+            short = "".join(
+                random.choices(LETTERS_AND_DIGITS, k=LEN_TO_GENERATE_SHORT)
             )
             if URLMap.get(short=short) is not None:
                 continue
             return short
-        raise RuntimeError(GENERATION_URL_ERROR)
+        raise RuntimeError(GENERATION_SHORT_ERROR)
 
     @staticmethod
     def create(original, short=None, validation=False):
-        if validation and short:
-            if len(short) > MAX_SHORT_LINK_LENGHT:
-                raise ValidationError(INVALID_SYMBOL_ERROR)
-        if not short:
-            short = URLMap.get_unique_short_id()
         if validation:
             if len(original) > MAX_ORIGINAL_LINK_LENGHT:
                 raise ValidationError(LEN_ORIGINAL_ERROR)
-            if not re.match(PATTERN_LINK, short):
-                raise ValidationError(INVALID_SYMBOL_ERROR)
-            if URLMap.get(short=short) is not None:
-                raise ValidationError(LINK_ALREADY_USE_ERROR)
-        url_map = URLMap(
-            original=original,
-            short=short
-        )
+            if short:
+                if (
+                    len(short) > MAX_SHORT_LENGHT
+                    or not
+                    re.match(PATTERN_SHORT, short)
+                ):
+                    raise ValidationError(INVALID_SYMBOL_ERROR)
+                if URLMap.get(short=short) is not None:
+                    raise ValidationError(SHORT_ALREADY_USE_ERROR)
+        if not short:
+            short = URLMap.get_unique_short_id()
+
+        url_map = URLMap(original=original, short=short)
         db.session.add(url_map)
         db.session.commit()
         return url_map

@@ -12,8 +12,8 @@ from .constants import (
     LEN_SHORT_ERROR,
     INVALID_SYMBOL_ERROR,
     LEN_TO_GENERATE_SHORT,
-    LINK_ALREADY_USE_ERROR,
-    PATTERN_LINK
+    SHORT_ALREADY_USE_ERROR,
+    PATTERN_SHORT
 )
 from .models import URLMap
 
@@ -37,12 +37,12 @@ class URLMapForm(FlaskForm):
                 max=LEN_TO_GENERATE_SHORT,
                 message=LEN_SHORT_ERROR
             ),
-            Regexp(PATTERN_LINK, message=INVALID_SYMBOL_ERROR)
+            Regexp(PATTERN_SHORT, message=INVALID_SYMBOL_ERROR)
         ]
     )
     submit = SubmitField(CREATE_LINK_DESCRIPTION)
 
     def validate_custom_id(form, field):
         if URLMap.get(short=field.data) is not None:
-            raise ValidationError(message=LINK_ALREADY_USE_ERROR)
+            raise ValidationError(message=SHORT_ALREADY_USE_ERROR)
         return field.data
