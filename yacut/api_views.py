@@ -39,5 +39,5 @@ def add_id():
             ),
             HTTPStatus.CREATED
         )
-    except ValidationError as error:
+    except (ValidationError, RuntimeError) as error:
         raise InvalidAPIUsage(str(error))

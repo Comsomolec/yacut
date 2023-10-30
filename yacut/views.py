@@ -16,7 +16,7 @@ def index_view():
         url_map = URLMap.create(
             original=form.original_link.data, short=form.custom_id.data
         )
-    except ValidationError as error:
+    except (ValidationError, RuntimeError) as error:
         flash(error)
         return render_template('index.html', form=form)
     return render_template(

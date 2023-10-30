@@ -12,7 +12,7 @@ from .constants import (
     GENERATION_URL_ERROR,
     INVALID_SYMBOL_ERROR,
     LETTERS_AND_DIGITS,
-    LEN_TO_GENERATE_SHORT_LINK,
+    LEN_TO_GENERATE_SHORT,
     LEN_ORIGINAL_ERROR,
     LINK_ALREADY_USE_ERROR,
     MAX_ORIGINAL_LINK_LENGHT,
@@ -47,23 +47,24 @@ class URLMap(db.Model):
         for _ in range(ATTEMPT_COUNT):
             short = ''.join(
                 random.choices(
-                    LETTERS_AND_DIGITS, k=LEN_TO_GENERATE_SHORT_LINK
+                    LETTERS_AND_DIGITS, k=LEN_TO_GENERATE_SHORT
                 )
             )
             if URLMap.get(short=short) is not None:
                 continue
             return short
-        raise ValidationError(GENERATION_URL_ERROR)
+        raise RuntimeError(GENERATION_URL_ERROR)
 
     @staticmethod
     def create(original, short=None, validation=False):
+        if validation and short:
+            if len(short) > MAX_SHORT_LINK_LENGHT:
+                raise ValidationError(INVALID_SYMBOL_ERROR)
         if not short:
             short = URLMap.get_unique_short_id()
         if validation:
             if len(original) > MAX_ORIGINAL_LINK_LENGHT:
                 raise ValidationError(LEN_ORIGINAL_ERROR)
-            if len(short) > MAX_SHORT_LINK_LENGHT:
-                raise ValidationError(INVALID_SYMBOL_ERROR)
             if not re.match(PATTERN_LINK, short):
                 raise ValidationError(INVALID_SYMBOL_ERROR)
             if URLMap.get(short=short) is not None:

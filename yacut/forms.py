@@ -11,7 +11,7 @@ from wtforms.validators import (
 from .constants import (
     LEN_SHORT_ERROR,
     INVALID_SYMBOL_ERROR,
-    LEN_TO_GENERATE_SHORT_LINK,
+    LEN_TO_GENERATE_SHORT,
     LINK_ALREADY_USE_ERROR,
     PATTERN_LINK
 )
@@ -34,7 +34,7 @@ class URLMapForm(FlaskForm):
         validators=[
             Optional(),
             Length(
-                max=LEN_TO_GENERATE_SHORT_LINK,
+                max=LEN_TO_GENERATE_SHORT,
                 message=LEN_SHORT_ERROR
             ),
             Regexp(PATTERN_LINK, message=INVALID_SYMBOL_ERROR)

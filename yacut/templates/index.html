@@ -35,11 +35,9 @@
             </form>
             <p class="py-3 mb-3">
               {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                  {% for message in messages %}
-                    <div class="error">{{ message }}</div>
-                  {% endfor %}
-                {% endif %}
+                {% for message in messages %}
+                  <div class="error">{{ message }}</div>
+                {% endfor %}
               {% endwith %}
             </p>
           </div>
@@ -54,9 +52,9 @@
           <div class="col-sm">
             <p class="text-center">
               {% if url %}
-              <h5 class="text-center">Ваша новая ссылка готова:</br>
-                <a href="{{ url }}">{{ url }}</a>
-              </h5>
+                <h5 class="text-center">Ваша новая ссылка готова:</br>
+                  <a href="{{ url }}">{{ url }}</a>
+                </h5>
               {% endif %}
             </p>
           </div>
